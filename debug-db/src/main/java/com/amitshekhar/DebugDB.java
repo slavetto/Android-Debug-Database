@@ -27,7 +27,6 @@ import com.amitshekhar.utils.NetworkUtils;
 
 import java.io.File;
 import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by amitshekhar on 15/11/16.
@@ -45,8 +44,23 @@ public class DebugDB {
     }
 
     public static void initialize(Context context) {
-        int portNumber;
+        //Calculating the address
+        int portNumber = retrievePortNumber(context);
 
+        clientServer = new ClientServer(context, portNumber);
+        clientServer.start();
+        addressLog = NetworkUtils.getAddressLog(context, portNumber);
+
+
+        //Checking whenever we have to output the address log to debug
+        boolean dumpDebug = Boolean.valueOf(context.getString(R.string.DUMP_DB_DEBUG_ADDRESS));
+        if (dumpDebug) {
+            Log.d(TAG, addressLog);
+        }
+    }
+
+    private static int retrievePortNumber(Context context) {
+        int portNumber;
         try {
             portNumber = Integer.valueOf(context.getString(R.string.PORT_NUMBER));
         } catch (NumberFormatException ex) {
@@ -54,15 +68,10 @@ public class DebugDB {
             portNumber = DEFAULT_PORT;
             Log.i(TAG, "Using Default port : " + DEFAULT_PORT);
         }
-
-        clientServer = new ClientServer(context, portNumber);
-        clientServer.start();
-        addressLog = NetworkUtils.getAddressLog(context, portNumber);
-        Log.d(TAG, addressLog);
+        return portNumber;
     }
 
     public static String getAddressLog() {
-        Log.d(TAG, addressLog);
         return addressLog;
     }
 
